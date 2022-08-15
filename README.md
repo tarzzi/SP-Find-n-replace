@@ -5,4 +5,4 @@ checks text webparts on the Page, finds the String given to it,
 and prompts what should it be changed.
 
 ## Example run
-(Example image)[example.png]
+[Example image](example.png)
