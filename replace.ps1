@@ -17,33 +17,60 @@ Handles logging color
 Run replacer and follow prompts
 
 .NOTES
-Version     16.8.2022   Author          Github
-1.0         Date        Tarmo Urrio     @Tarzzi
+Version     Date        Author          Github
+1.0         16.8.2022   Tarmo Urrio     @Tarzzi
 
+.FUNCTIONALITY
+TODO
+- Capital letter search & replace // Check text also for capital version
+- Page title search
+- Other webparts, eg titles
+- Multiple hits on same text webpart
 #>
 
-function WriteLog{
+param (
+    [Parameter(Mandatory = $true, HelpMessage = "Site collection address, where to check for the text")]
+    $SiteURL,
+    [Parameter(Mandatory = $true, HelpMessage = "Text string to find from the sites")]
+    $String,
+    [switch]$ReplaceAll,
+    [switch]$Capital,
+    [switch]$Text,
+    [switch]$Title,
+    [switch]$Other
+)
+
+Get-Module PnP.PowerShell
+
+
+function WriteLog {
     Param ([String]$LogString, [String]$Color)
     $Stamp = Get-Date -Format "HH:mm:ss" 
     $LogMessage = $Stamp + ": " + $LogString
     Write-Host $LogMessage -ForegroundColor $Color
 }
 
-$Location = (Get-Item .).FullName
-$Timestamp = Get-Date -Format "ddMMHHmm" 
-$Location = $Location + "\replacer_log_" + $Timestamp + ".txt"  
-Start-Transcript -Append $Location
-$SiteURL = Read-Host "Give site collection url"
-$OldString = Read-Host "Text to find"
+function FindAndReplace {
+    # Logging
+    $Location = (Get-Item .).FullName
+    $Timestamp = Get-Date -Format "ddMMHHmm" 
+    $Location = $Location + "\replace_log_" + $Timestamp + ".log"  
+    Start-Transcript -Append $Location
+
+
+    if ($ReplaceAll.IsPresent) {
+        $NewString = Read-Host "Give the string to replace all found items"
+    }
 
     Try {
-        WriteLog "Connect to $($SiteURL)" White
+        WriteLog "Connecting to $($SiteURL)" Yellow
         Connect-PnPOnline -URL $SiteURL -Interactive
 
-            $PageItems = Get-PnPListItem -List "Site Pages"
-            $Pages = $PageItems | ForEach-Object { $_["FileLeafRef"] }
-            $PageCount = $Pages.Length
-            $Count = 1
+        $PageItems = Get-PnPListItem -List "Site Pages"
+        $Pages = $PageItems | ForEach-Object { $_["FileLeafRef"] }
+        $PageCount = $Pages.Length
+        $Count = 1
+        $LikeStr = '*' + $String + '*'
 
         $Pages | ForEach-Object {
             try {
@@ -51,35 +78,52 @@ $OldString = Read-Host "Text to find"
                 $Page = Get-PnPPage -Identity $_
                 Write-Host "`n"
                 WriteLog " Checking site $($Page.Name) ($($Count)/$($PageCount))" White
-                $Controls = $Page.Controls | Where-Object { "PageText" -eq $_.Type.Name }    
-                WriteLog "- Found ($($Controls.Length)) text web part(s)" White
 
-                $Controls | ForEach-Object {                        
-                    WriteLog "-- Checking web part InstanceId: $($_.InstanceId)"  White
-                    try {
-                        $String = $_.text
-                        $LikeStr = '*' + $OldString + '*'
-                        if($String -like $LikeStr){
-                            WriteLog "--- Bingo! Found text:" Green
-                            WriteLog $String White
-                            WriteLog "What should it be replaced with?" Yellow 
-                            $NewString = Read-Host 
-                            $_.text = $String.replace($OldString,$NewString)
-                            WriteLog "Text updated!" Green
+                # Begin Check Other
+                # TODO    $Controls = $Page.Controls | Where-Object { "PageText" -ne $_.Type.Name } 
+                # End Check Other
 
-                            $null = $Page.Save()
-                            $null = $Page.Publish()
-                            WriteLog "$($Page.Name) saved and published." Green      
+                # Begin Check Title
+                # TODO
+                # End Check Title
+
+                # Begin Check plaintext webparts
+                if ($Text.IsPresent) {
+                    $Controls = $Page.Controls | Where-Object { "PageText" -eq $_.Type.Name }    
+                    WriteLog "- Found ($($Controls.Length)) text web part(s)" White
+
+                    $Controls | ForEach-Object {                        
+                        WriteLog "-- Checking web part InstanceId: $($_.InstanceId)"  White
+                        try {
+                            $FoundString = $_.Text
+                            if ($FoundString -like $LikeStr) {
+                                WriteLog "--- Bingo! Found text:" Green
+                                WriteLog $FoundString White
+                                if (!$ReplaceAll.IsPresent) {
+                                    WriteLog "What should it be replaced with?" Yellow 
+                                    $NewString = Read-Host "New string"
+                                }
+                           
+                                #$_.text = $String.replace($String, $NewString)
+                                $_.text = $FoundString -replace $String, $NewString
+
+                                WriteLog "Text updated!" Green
+
+                                $null = $Page.Save()
+                                $null = $Page.Publish()
+                                WriteLog "$($Page.Name) saved and published." Green      
+                            }
+                            else {
+                                WriteLog "--- No matches!" Yellow
+                            }
+
                         }
-                        else{
-                            WriteLog "--- No matches!" Yellow
+                        catch {                           
+                            WriteLog "Failed updating web part, InstanceId: $($_.InstanceId), Error: $($_.Exception)" Red
                         }
-
-                    }
-                    catch {                           
-                        WriteLog "Failed updating web part, InstanceId: $($_.InstanceId), Error: $($_.Exception)" Red
                     }
                 }
+                # End Check plaintext webparts
             }
             catch {
                 WriteLog "Failed checking Page $($Page.Title): $($_.Exception)" Red
@@ -88,13 +132,16 @@ $OldString = Read-Host "Text to find"
         }
 
         WriteLog "Text replacer finished!" Green
-        Disconnect-PnPOnline 
+        Disconnect-PnPOnline
         Stop-Transcript
     }
 
     Catch {
-        WriteLog $_.Exception
+        WriteLog $_.Exception Red
         Stop-Transcript
         Break
     }
 
+}
+
+. FindAndReplace
