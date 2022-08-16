@@ -1,4 +1,4 @@
-# SP-Replacer
+# SP-Find-n-replace
 ## Find and replace for Sharepoint text webparts
 SP Replacer loops through a Sharepoint Modern site collection site Pages, 
 checks text webparts on the Page, finds the String given to it, 
