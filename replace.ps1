@@ -38,9 +38,7 @@ Switch to enable webpart scanning
 2. Follow prompts
 
 .NOTES
-#TODO
-- Cancel string that can be set up 
-- Force
+Create an issue if somethings not lining up
 #>
 
 
