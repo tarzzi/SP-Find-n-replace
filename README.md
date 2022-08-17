@@ -11,3 +11,4 @@ and prompts what should it be changed.
 |Version|Date|Updates|
 |--|--|--|
 |1.0|16.8.2022|Initial version|
+|1.1|17.8.2022|Add replacing for page title and other webparts. Add force switch and confirmation. |
