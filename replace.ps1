@@ -15,6 +15,9 @@ Tarmo Urrio     @Tarzzi     https://urrio.fi
 .PARAMETER Force
 Switch to not care about possible wrong hits. Fast and furious.
 
+.PARAMETER HubSite
+Switch to check entire hubsites pages
+
 .PARAMETER ReplaceAll
 Switch to toggle replacing all possible hits that are found with the same string
 
@@ -43,10 +46,11 @@ Create an issue if somethings not lining up
 
 
 param (
-	[Parameter(Mandatory = $true, HelpMessage = "Site collection address, where to check for the text")]
+	[Parameter(Mandatory = $true, HelpMessage = "Hubsite / Site collection address, where to check for the text")]
 	$SiteURL,
 	[Parameter(Mandatory = $true, HelpMessage = "Text string to find from the sites")]
 	$String,
+	[switch]$HubSite,
 	[switch]$ReplaceAll,
 	[switch]$Capital,
 	[switch]$Text,
@@ -77,65 +81,43 @@ function FindAndReplace {
 		$NewString = Read-Host "Give the string to replace all found items"
 	}
 
-	Try {
-		WriteLog "Connecting to $($SiteURL)" Yellow
-		Connect-PnPOnline -URL $SiteURL -Interactive -ErrorAction Stop
-	}
-	Catch {
-		WriteLog "Error connecting to Sharepoint"
-	}
 
-	Try {
-		$PageItems = Get-PnPListItem -List "Site Pages"
-		$Pages = $PageItems | ForEach-Object { $_["FileLeafRef"] }
-		$PageCount = $Pages.Length
-		$Count = 1
-		$LikeStr = '*' + $String + '*'
+	# Get hubsite and refrence to id:s
+	if ($HubSite.IsPresent){
+		$AdminSiteURL = Read-Host "Enter Admin site URL: "
+		Connect-PnPOnline -URL $AdminSiteURL -Interactive -ErrorAction Stop
+		$HubSiteURL = $SiteURL
+		$HubSite = Get-PnPHubSite -Identity $HubSiteURL
+		$HubID = $HubSite.ID.GUID
+		$Sites = Get-PnPTenantSite
 
-		# Loop pages of collection
-		$Pages | ForEach-Object {
-			try {
-				$RequireSave = $false
-
-				$Page = Get-PnPPage -Identity $_
-				Write-Host "`n"
-				WriteLog "Checking site $($Page.Name) ($($Count)/$($PageCount))" White
-
-				# Page Title 
-				CheckTitles
-
-				# Other Webparts
-				CheckWebparts
-
-				# Plaintext webparts
-				CheckText
-
+		$Sites | ForEach-Object {
+			# Write-Host $_.HubSiteID
+			$SiteGUID = $_.HubSiteID
+			if($HubID -eq $SiteGUID){
+				# Check page on match
+				$SiteURL = $_.Url
+				Write-Host $SiteURL
+				Connect 
 			}
-			catch {
-				WriteLog "Failed checking Page $($Page.Title): $($_.Exception)" Red
-			}
-			# Save page when changes have been made 
-			if ($RequireSave) {
-				$null = $Page.Save()
-				$null = $Page.Publish()
-				WriteLog "$($Page.Name) saved and published." Green    
-			}
-			$Count += 1
 		}
-
-		WriteLog "Text replacer finished!" Green
-		Disconnect-PnPOnline
-		Stop-Transcript
+		
+        WriteLog "Text replacer finished!" Green
+        Disconnect-PnPOnline
+        Stop-Transcript
+	}
+	else{
+		Connect
+		
+        WriteLog "Text replacer finished!" Green
+        Disconnect-PnPOnline
+        Stop-Transcript
 	}
 
-	Catch {
-		WriteLog $_.Exception Red
-		Stop-Transcript
-		Break
-	}
 }
 
 . "$PSScriptRoot\Finder\Title.ps1"
 . "$PSScriptRoot\Finder\Webpart.ps1"
 . "$PSScriptRoot\Finder\Text.ps1"
+. "$PSScriptRoot\Finder\Connect.ps1"
 FindAndReplace
