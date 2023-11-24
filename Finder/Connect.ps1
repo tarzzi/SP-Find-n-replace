@@ -12,6 +12,7 @@ function Connect {
         $PageCount = $Pages.Length
         $Count = 1
         $LikeStr = '*' + $String + '*'
+        $CsvItem = @()
 
         # Loop pages of collection
         $Pages | ForEach-Object {
@@ -31,16 +32,14 @@ function Connect {
                 # Plaintext webparts
                 CheckText
 
+                # Author
+                CheckAuthor
+
             }
             catch {
                 WriteLog "Failed checking Page $($Page.Title): $($_.Exception)" Red
             }
-            # Save page when changes have been made 
-            if ($RequireSave) {
-                $null = $Page.Save()
-                $null = $Page.Publish()
-                WriteLog "$($Page.Name) saved and published." Green    
-            }
+            
             $Count += 1
         }
 

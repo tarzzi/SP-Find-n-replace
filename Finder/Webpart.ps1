@@ -19,150 +19,194 @@ function CheckWebparts {
 					# Webpart Title
 					if ($altText -like $LikeStr) {
 						WriteLog "-- Bingo! Found matching alt text: $($altText)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $altText
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.altText = $altText -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.altText = $altText -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.altText = $altText -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}
 					#Webpart Alt-text
 					elseif ($wpTitle -like $LikeStr) {
-						WriteLog "-- Bingo! Found matching title text: $($altText)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						WriteLog "-- Bingo! Found matching title text: $($wpTitle)" Green
+						
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $altText
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.Title = $wpTitle -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.Title = $wpTitle -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.Title = $wpTitle -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}
 					#Webpart Link-text
 					elseif ($wpLink -like $LikeStr) {
 						WriteLog "-- Bingo! Found matching link text: $($wpLink)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $wpLink
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.Link = $wpLink -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.Link = $wpLink -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.Link = $wpLink -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}
 					#Webpart custom Title-text
 					elseif ($wpCustomTitle -like $LikeStr) {
 						WriteLog "-- Bingo! Found matching title text: $($wpCustomTitle)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $altText
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.collectionData.title = $wpCustomTitle -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.collectionData.title = $wpCustomTitle -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.collectionData.title = $wpCustomTitle -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}
 					#Webpart custom Description-text
 					elseif ($wpCustomDesc -like $LikeStr) {
 						WriteLog "-- Bingo! Found matching description text: $($wpCustomDesc)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $wpCustomDesc
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.collectionData.description = $wpCustomDesc -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.collectionData.description = $wpCustomDesc -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.collectionData.description = $wpCustomDesc -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}
 					#Webpart custom Link-text
 					elseif ($wpCustomLink -like $LikeStr) {
 						WriteLog "-- Bingo! Found matching link text: $($wpCustomLink)" Green
-						if (!$ReplaceAll.IsPresent) {
-							WriteLog "What should it be replaced with?" Yellow 
-							$NewString = Read-Host "New string"
+						$CsvItem += [PSCustomObject]@{
+							"SiteUrl" = $SiteURL
+							"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+							"Text"    = $wpCustomLink
 						}
-						if ($Force.IsPresent) {
-							$_.PropertiesJson.collectionData.link = $wpCustomLink -replace $String, $NewString
-							WriteLog "Text replaced!" Green
-							$RequireSave = $true
-						}
-						else {
-							WriteLog "Are you sure you want to replace this y/n ?" Yellow
-							$Confirm = Read-Host "Type y for yes, n for no"
-							if ($Confirm -eq "y") {
+						if (!$FindOnly.IsPresent) {
+							if (!$ReplaceAll.IsPresent) {
+								WriteLog "What should it be replaced with?" Yellow 
+								$NewString = Read-Host "New string"
+							}
+							if ($Force.IsPresent) {
 								$_.PropertiesJson.collectionData.link = $wpCustomLink -replace $String, $NewString
 								WriteLog "Text replaced!" Green
-								$RequireSave = $true
+								SavePage
 							}
 							else {
-								WriteLog "Skipping..." Yellow
+								WriteLog "Are you sure you want to replace this y/n ?" Yellow
+								$Confirm = Read-Host "Type y for yes, n for no"
+								if ($Confirm -eq "y") {
+									$_.PropertiesJson.collectionData.link = $wpCustomLink -replace $String, $NewString
+									WriteLog "Text replaced!" Green
+									SavePage
+								}
+								else {
+									WriteLog "Skipping..." Yellow
+								}
 							}
 						}
 					}

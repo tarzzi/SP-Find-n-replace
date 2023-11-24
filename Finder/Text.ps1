@@ -11,25 +11,32 @@ function CheckText {
 				if ($FoundString -like $LikeStr) {
 					WriteLog "--- Bingo! Found text:" Green
 					WriteLog $FoundString White
-					if (!$ReplaceAll.IsPresent) {
-						WriteLog "What should it be replaced with?" Yellow 
-						$NewString = Read-Host "New string"
+					$CsvItem += [PSCustomObject]@{
+						"SiteUrl" = $SiteURL
+						"PageUrl" = $SiteUrl + "/sitepages/" + $Page.Name
+						"Text"    = $FoundString
 					}
-					if ($Force.IsPresent) {
-						$_.text = $FoundString -replace $String, $NewString
-						WriteLog "Text replaced!" Green
-						$RequireSave = $true
-					}
-					else {
-						WriteLog "Are you sure you want to replace this y/n ?" Yellow
-						$Confirm = Read-Host "Type y for yes, n for no"
-						if ($Confirm -eq "y") {
+					if (!$FindOnly.IsPresent) {
+						if (!$ReplaceAll.IsPresent) {
+							WriteLog "What should it be replaced with?" Yellow 
+							$NewString = Read-Host "New string"
+						}
+						if ($Force.IsPresent) {
 							$_.text = $FoundString -replace $String, $NewString
 							WriteLog "Text replaced!" Green
-							$RequireSave = $true
+							SavePage
 						}
 						else {
-							WriteLog "Skipping..." Yellow
+							WriteLog "Are you sure you want to replace this y/n ?" Yellow
+							$Confirm = Read-Host "Type y for yes, n for no"
+							if ($Confirm -eq "y") {
+								$_.text = $FoundString -replace $String, $NewString
+								WriteLog "Text replaced!" Green
+								SavePage
+							}
+							else {
+								WriteLog "Skipping..." Yellow
+							}
 						}
 					}
 				}
